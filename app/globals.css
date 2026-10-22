@@ -1,26 +1,610 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ------------------------------------------------------------------ */
+/* Design tokens (spec 2.3)                                            */
+/* ------------------------------------------------------------------ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5f5f5;
+  --background-2: #ececec;
+  --foreground: #0a0a0a;
+  --muted: #5f5f5f;
+  --muted-2: #8f8f8f;
+  --border: #e2e2e2;
+  --border-strong: #cccccc;
+  --card: #ffffff;
+  --accent: #0070f3;
+  --success: #0cce6b;
+  --success-text: #0a7d43;
+  --warning: #f5a623;
+  --danger: #ee0000;
+  --grid: rgba(0, 0, 0, 0.05);
+  --glow: rgba(0, 112, 243, 0.1);
+  color-scheme: light;
 }
 
+.dark {
+  --background: #000000;
+  --background-2: #0a0a0a;
+  --foreground: #ededed;
+  --muted: #a1a1a1;
+  --muted-2: #6f6f6f;
+  --border: #1f1f1f;
+  --border-strong: #333333;
+  --card: #0a0a0a;
+  --accent: #3291ff;
+  --success: #50e3c2;
+  --success-text: #50e3c2;
+  --warning: #f7b955;
+  --danger: #ff4d4d;
+  --grid: rgba(255, 255, 255, 0.06);
+  --glow: rgba(50, 145, 255, 0.12);
+  color-scheme: dark;
+}
+
+/* Tailwind v4 theme mapping (spec 13) */
 @theme inline {
   --color-background: var(--background);
+  --color-background-2: var(--background-2);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-2: var(--muted-2);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-card: var(--card);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-success-text: var(--success-text);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Typography scale (spec 2.2) */
+  --text-display: 44px;
+  --text-display--line-height: 46px;
+  --text-display--letter-spacing: -0.04em;
+  --text-display--font-weight: 600;
+  --text-h1: 48px;
+  --text-h1--line-height: 52px;
+  --text-h1--letter-spacing: -0.035em;
+  --text-h1--font-weight: 600;
+  --text-h2: 36px;
+  --text-h2--line-height: 40px;
+  --text-h2--letter-spacing: -0.03em;
+  --text-h2--font-weight: 600;
+  --text-h3: 24px;
+  --text-h3--line-height: 32px;
+  --text-h3--letter-spacing: -0.02em;
+  --text-h3--font-weight: 600;
+  --text-body-lg: 20px;
+  --text-body-lg--line-height: 32px;
+  --text-body-lg--letter-spacing: -0.01em;
+  --text-body: 16px;
+  --text-body--line-height: 24px;
+  --text-small: 14px;
+  --text-small--line-height: 20px;
+  --text-label: 12px;
+  --text-label--line-height: 16px;
+  --text-label--letter-spacing: 0.02em;
+  --text-label--font-weight: 500;
+
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
 }
 
-@media (prefers-color-scheme: dark) {
+@media (min-width: 768px) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --text-display: 72px;
+    --text-display--line-height: 72px;
   }
+}
+
+/* Smaller page titles on phones */
+@media (max-width: 767px) {
+  :root {
+    --text-h1: 36px;
+    --text-h1--line-height: 40px;
+    --text-h2: 30px;
+    --text-h2--line-height: 36px;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Base                                                                */
+/* ------------------------------------------------------------------ */
+
+html {
+  scroll-padding-top: 80px;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Effects                                                             */
+/* ------------------------------------------------------------------ */
+
+.grid-bg {
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 64px 64px;
+  background-position: center top;
+  mask-image: radial-gradient(ellipse at center, #000 40%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 40%, transparent 75%);
+}
+
+.glow {
+  background: radial-gradient(closest-side, var(--glow), transparent);
+}
+
+/* Card spotlight that follows the cursor (set by the inline effects script) */
+.spotlight {
+  position: relative;
+  isolation: isolate;
+}
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms ease;
+  background: radial-gradient(
+    400px circle at var(--x, 50%) var(--y, 50%),
+    var(--grid),
+    transparent 40%
+  );
+  z-index: -1;
+}
+@media (hover: hover) and (pointer: fine) {
+  .spotlight:hover::before {
+    opacity: 1;
+  }
+}
+
+/* Scroll reveal: only hidden once the inline script has flagged JS support */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 400ms ease-out,
+    transform 400ms ease-out;
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.js [data-reveal][data-in] {
+  opacity: 1;
+  transform: none;
+}
+
+.mask-fade-x {
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+  .animate-marquee {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Long-form content (blog, case studies, legal)                       */
+/* ------------------------------------------------------------------ */
+
+.prose {
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 28px;
+}
+.prose > * + * {
+  margin-top: 1.25em;
+}
+.prose h2 {
+  color: var(--foreground);
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-top: 2.25em;
+}
+.prose h3 {
+  color: var(--foreground);
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 1.75em;
+}
+.prose strong {
+  color: var(--foreground);
+  font-weight: 600;
+}
+.prose a {
+  color: var(--foreground);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--border-strong);
+}
+.prose a:hover {
+  text-decoration-color: var(--foreground);
+}
+.prose ul,
+.prose ol {
+  padding-left: 1.25em;
+}
+.prose ul {
+  list-style: disc;
+}
+.prose ol {
+  list-style: decimal;
+}
+.prose li + li {
+  margin-top: 0.5em;
+}
+.prose li::marker {
+  color: var(--muted-2);
+}
+.prose code {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.875em;
+  background: var(--background-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  color: var(--foreground);
+}
+.prose blockquote {
+  border-left: 2px solid var(--border-strong);
+  padding-left: 1em;
+  color: var(--foreground);
+}
+.prose hr {
+  border-color: var(--border);
+  margin: 2.5em 0;
+}
+
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
+
+/* Currency switch (see components/ui/currency-toggle.tsx) */
+.cur-usd {
+  display: none;
+}
+[data-currency="usd"] .cur-usd {
+  display: inline;
+}
+[data-currency="usd"] .cur-ngn {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Demo websites (components/demo). Sized in em from a cqw base so a   */
+/* demo scales like a screenshot at any width. Client sites keep their */
+/* own brand colors in both themes, like a real screenshot would.     */
+/* ------------------------------------------------------------------ */
+
+.demo {
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0;
+  line-height: 1.35;
+}
+.demo .font-serif {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+/* Fabric and material textures */
+.tex-adire {
+  background-color: #1e3a8a;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.9) 0 0.16em, transparent 0.18em),
+    radial-gradient(circle, transparent 0 0.42em, rgba(255, 255, 255, 0.35) 0.44em 0.52em, transparent 0.54em),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.07) 0 0.25em, transparent 0.25em 1.1em);
+  background-size: 2.2em 2.2em, 2.2em 2.2em, auto;
+}
+.tex-ankara {
+  background-color: #c2410c;
+  background-image:
+    radial-gradient(circle, #fbbf24 0 0.3em, #1e3a8a 0.32em 0.55em, transparent 0.57em),
+    radial-gradient(circle, #15803d 0 0.12em, transparent 0.14em);
+  background-size: 1.6em 1.6em, 0.8em 0.8em;
+  background-position: 0 0, 0.4em 0.4em;
+}
+.tex-asooke {
+  background-image: repeating-linear-gradient(
+    90deg,
+    #a16207 0 0.5em,
+    #fde68a 0.5em 0.7em,
+    #7c2d12 0.7em 1.1em,
+    #a16207 1.1em 1.6em
+  );
+}
+.tex-linen {
+  background-color: #556b2f;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.08) 0 1px, transparent 1px 3px);
+}
+.tex-granite {
+  background-color: #6b6b6b;
+  background-image:
+    radial-gradient(#2b2b2b 15%, transparent 17%),
+    radial-gradient(#c4c4c4 12%, transparent 14%),
+    radial-gradient(#8a8a8a 18%, transparent 20%);
+  background-size: 0.7em 0.7em, 0.9em 0.9em, 1.3em 1.3em;
+  background-position: 0 0, 0.35em 0.5em, 0.2em 0.9em;
+}
+.tex-sand {
+  background-color: #d6b98c;
+  background-image:
+    radial-gradient(#b08a52 20%, transparent 23%),
+    radial-gradient(#efdcb9 18%, transparent 21%);
+  background-size: 0.45em 0.45em, 0.6em 0.6em;
+  background-position: 0 0, 0.2em 0.25em;
+}
+.tex-gravel {
+  background-color: #7a6a58;
+  background-image:
+    radial-gradient(circle at 30% 30%, #a39280 0 0.32em, transparent 0.34em),
+    radial-gradient(circle at 70% 60%, #4f4235 0 0.28em, transparent 0.3em),
+    radial-gradient(circle at 50% 85%, #c2b5a5 0 0.2em, transparent 0.22em);
+  background-size: 1.4em 1.4em, 1.1em 1.1em, 0.9em 0.9em;
+}
+.tex-bokeh {
+  background-color: #4a044e;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(251, 191, 36, 0.55) 0 1.4em, transparent 1.5em),
+    radial-gradient(circle at 70% 20%, rgba(244, 114, 182, 0.45) 0 2em, transparent 2.1em),
+    radial-gradient(circle at 80% 75%, rgba(251, 191, 36, 0.4) 0 1.1em, transparent 1.2em),
+    radial-gradient(circle at 35% 80%, rgba(255, 255, 255, 0.25) 0 0.8em, transparent 0.9em),
+    radial-gradient(circle at 55% 50%, rgba(253, 224, 71, 0.3) 0 2.6em, transparent 2.7em),
+    linear-gradient(160deg, #701a75, #3b0764 60%, #1e1b4b);
+}
+
+/* Keyframes. Loops inside demos run on a 6s cycle, offset by --d. */
+@keyframes demo-slide {
+  0% { opacity: 0; }
+  2% { opacity: 1; }
+  31.5% { opacity: 1; }
+  33.33% { opacity: 0; }
+  100% { opacity: 0; }
+}
+@keyframes demo-cursor {
+  0% { opacity: 0; transform: translate(9em, 7em); }
+  12% { opacity: 1; }
+  38% { transform: translate(0, 0); }
+  42% { transform: translate(0, 0) scale(0.8); }
+  46% { transform: translate(0, 0) scale(1); }
+  80% { opacity: 1; transform: translate(0, 0); }
+  92%, 100% { opacity: 0; transform: translate(2em, 3em); }
+}
+@keyframes demo-out {
+  0%, 43% { opacity: 1; }
+  45%, 95% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes demo-in {
+  0%, 43% { opacity: 0; }
+  45%, 95% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes demo-bump {
+  0%, 44% { transform: scale(1); }
+  48% { transform: scale(1.4); }
+  54%, 100% { transform: scale(1); }
+}
+@keyframes demo-ping {
+  0% { transform: scale(1); opacity: 0.55; }
+  80%, 100% { transform: scale(1.9); opacity: 0; }
+}
+@keyframes demo-progress {
+  from { transform: scaleX(0.25); }
+  to { transform: scaleX(0.8); }
+}
+@keyframes demo-type {
+  0%, 8% { clip-path: inset(0 100% 0 0); }
+  40%, 92% { clip-path: inset(0 0 0 0); }
+  100% { clip-path: inset(0 100% 0 0); }
+}
+@keyframes demo-blink {
+  50% { opacity: 0; }
+}
+@keyframes demo-msg1 {
+  0%, 4% { opacity: 0; transform: translateY(0.6em); }
+  9%, 94% { opacity: 1; transform: none; }
+  100% { opacity: 0; }
+}
+@keyframes demo-typing {
+  0%, 14% { opacity: 0; }
+  17%, 33% { opacity: 1; }
+  36%, 100% { opacity: 0; }
+}
+@keyframes demo-msg2 {
+  0%, 34% { opacity: 0; transform: translateY(0.6em); }
+  39%, 94% { opacity: 1; transform: none; }
+  100% { opacity: 0; }
+}
+@keyframes demo-msg3 {
+  0%, 52% { opacity: 0; transform: translateY(0.6em); }
+  57%, 94% { opacity: 1; transform: none; }
+  100% { opacity: 0; }
+}
+@keyframes demo-msg4 {
+  0%, 68% { opacity: 0; transform: translateY(0.6em); }
+  73%, 94% { opacity: 1; transform: none; }
+  100% { opacity: 0; }
+}
+@keyframes demo-grow {
+  0% { transform: scaleY(0.15); }
+  35%, 88% { transform: scaleY(1); }
+  100% { transform: scaleY(0.15); }
+}
+@keyframes demo-toast {
+  0%, 18% { opacity: 0; transform: translateY(1em); }
+  24%, 82% { opacity: 1; transform: none; }
+  90%, 100% { opacity: 0; transform: translateY(0.5em); }
+}
+@keyframes demo-dot {
+  0%, 80%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+@keyframes demo-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-0.4em); }
+}
+@keyframes demo-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo,
+  .demo *,
+  .demo-slide {
+    animation: none !important;
+  }
+  .demo .demo-alt,
+  .demo .demo-cursor {
+    display: none;
+  }
+  .demo-slide:not(:first-child) {
+    opacity: 0 !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Service illustrations (components/illustrations). Theme-aware, sized */
+/* in em from a cqw base. ill-on-N reveals at step N of a loop and      */
+/* hides everything together at the end, so steps play in sequence.     */
+/* ------------------------------------------------------------------ */
+
+@keyframes ill-on-1 { 0%, 10% { opacity: 0; transform: translateY(0.4em) scale(0.96); } 14%, 92% { opacity: 1; transform: none; } 97%, 100% { opacity: 0; } }
+@keyframes ill-on-2 { 0%, 28% { opacity: 0; transform: translateY(0.4em) scale(0.96); } 32%, 92% { opacity: 1; transform: none; } 97%, 100% { opacity: 0; } }
+@keyframes ill-on-3 { 0%, 46% { opacity: 0; transform: translateY(0.4em) scale(0.96); } 50%, 92% { opacity: 1; transform: none; } 97%, 100% { opacity: 0; } }
+@keyframes ill-on-4 { 0%, 64% { opacity: 0; transform: translateY(0.4em) scale(0.96); } 68%, 92% { opacity: 1; transform: none; } 97%, 100% { opacity: 0; } }
+@keyframes ill-on-5 { 0%, 80% { opacity: 0; transform: translateY(0.4em) scale(0.9); } 84%, 92% { opacity: 1; transform: none; } 97%, 100% { opacity: 0; } }
+/* Visible only in a window, for swapping states */
+@keyframes ill-phase-a { 0%, 30% { opacity: 1; } 32%, 98% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes ill-phase-b { 0%, 30% { opacity: 0; } 32%, 52% { opacity: 1; } 54%, 100% { opacity: 0; } }
+@keyframes ill-phase-c { 0%, 52% { opacity: 0; transform: scale(0.85); } 56%, 92% { opacity: 1; transform: none; } 97%, 100% { opacity: 0; } }
+@keyframes ill-cursor {
+  0% { opacity: 0; transform: translate(6em, 5em); }
+  8% { opacity: 1; }
+  24% { transform: translate(0, 0); }
+  28% { transform: scale(0.8); }
+  31% { transform: scale(1); }
+  40% { opacity: 1; }
+  48%, 100% { opacity: 0; transform: translate(1em, 1.5em); }
+}
+@keyframes ill-spin { to { transform: rotate(360deg); } }
+@keyframes ill-progress {
+  0%, 10% { transform: scaleX(0.04); }
+  14%, 28% { transform: scaleX(0.25); }
+  32%, 46% { transform: scaleX(0.5); }
+  50%, 64% { transform: scaleX(0.75); }
+  68%, 94% { transform: scaleX(1); }
+  100% { transform: scaleX(0.04); }
+}
+@keyframes ill-fill { 0%, 10% { transform: scaleX(0); } 60%, 94% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+@keyframes ill-rise { 0%, 22% { transform: translateY(0); } 42%, 92% { transform: translateY(var(--rise)); } 100% { transform: translateY(0); } }
+@keyframes ill-move {
+  0%, 22% { transform: translateX(0); }
+  30%, 52% { transform: translateX(var(--step)); }
+  60%, 88% { transform: translateX(calc(var(--step) * 2)); opacity: 1; }
+  94% { opacity: 0; transform: translateX(calc(var(--step) * 2)); }
+  100% { opacity: 0; transform: translateX(0); }
+}
+@keyframes ill-draw { 0%, 10% { stroke-dashoffset: 1; } 70%, 92% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 1; } }
+@keyframes ill-glow { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 0 0.35em color-mix(in srgb, var(--glow-color, #16a34a) 25%, transparent); } }
+
+.ill {
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  line-height: 1.35;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ill,
+  .ill * {
+    animation: none !important;
+  }
+  .ill .ill-alt,
+  .ill .ill-cursor,
+  .ill .ill-dot {
+    display: none;
+  }
+}
+
+/* Client site previews (components/demo/clients) */
+@keyframes demo-count {
+  to { transform: translateY(var(--to)); }
+}
+@keyframes demo-shirt {
+  0%, 30% { fill: #ffffff; }
+  34%, 63% { fill: #111827; }
+  67%, 96% { fill: #0891b2; }
+  100% { fill: #ffffff; }
+}
+@keyframes demo-print {
+  0%, 30% { fill: #e11d74; }
+  34%, 63% { fill: #facc15; }
+  67%, 96% { fill: #ffffff; }
+  100% { fill: #e11d74; }
+}
+@keyframes demo-zoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.07); }
 }
